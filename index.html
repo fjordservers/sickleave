@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sick Leave Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        form {
+            text-align: center;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sick Leave Form</h2>
+        <form id="sickLeaveForm" action="#">
+            <input type="file" id="fileInput" accept=".pdf" required>
+            <label for="fileInput">Upload Sick Leave Document (PDF)</label>
+            <p id="status"></p>
+        </form>
+    </div>
+
+    <script>
+        // HTML form (similar to the previous example)
+// ...
+
+document.getElementById("fileInput").addEventListener("change", function () {
+    const fileInput = this;
+    const status = document.getElementById("status");
+  
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+  
+      reader.onload = function (e) {
+        const fileData = e.target.result;
+  
+        // Send the file data to the Netlify function for processing.
+        fetch('/.netlify/functions/upload', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: file.name,
+            type: file.type,
+            data: fileData.split(',')[1], // Extract base64 data
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            status.innerText = data.message;
+          })
+          .catch((error) => {
+            status.innerText = 'Error uploading the document.';
+          });
+      };
+  
+      reader.readAsDataURL(file);
+    }
+  });
+  
+    </script>
+</body>
+</html>
